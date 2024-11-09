@@ -1,0 +1,736 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #cf1414;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        /* Form Container */
+        .form-container {
+            background: #ffffff;
+            padding: 20px;
+            width: 300px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .form-container form label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .form-container form input,
+        .form-container form textarea,
+        .form-container form button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-container form button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .form-container form button:hover {
+            background-color: #0056b3;
+        }
+        /* Recipe List */
+        .recipe-container {
+            width: 100%;
+            max-width: 800px;
+        }
+        .recipe {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+        .recipe h2 {
+            font-size: 1.5em;
+        }
+        .recipe small {
+            display: block;
+            margin-bottom: 10px;
+            color: #6c757d;
+        }
+        .recipe img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .recipe .button-group {
+            margin-top: 15px;
+        }
+        .recipe .button-group button {
+            padding: 8px 12px;
+            margin-right: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            color: #fff;
+        }
+        .recipe .edit-btn {
+            background-color: #28a745;
+        }
+        .recipe .edit-btn:hover {
+            background-color: #218838;
+        }
+        .recipe .delete-btn {
+            background-color: #dc3545;
+        }
+        .recipe .delete-btn:hover {
+            background-color: #c82333;
+        }
+        /* Modal for Editing Recipe */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 300px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .modal-content h2 {
+            margin-bottom: 10px;
+        }
+        .modal-content input,
+        .modal-content textarea,
+        .modal-content button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .modal-content button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .modal-content button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="form-container">
+            <h1>Recipe Information Form</h1>
+            <form onsubmit="event.preventDefault(); createRecipe();">
+                <label for="recipeName">Recipe Name:</label>
+                <input type="text" id="recipeName" required>
+
+                <label for="cookingTime">Cooking Time:</label>
+                <input type="text" id="cookingTime" required>
+
+                <label for="ingredients">Ingredients (one per line):</label>
+                <textarea id="ingredients" rows="5" required></textarea>
+
+                <label for="instructions">Instructions (one per line):</label>
+                <textarea id="instructions" rows="5" required></textarea>
+
+                <label for="equipment">Special Equipment Needed (one per line):</label>
+                <textarea id="equipment" rows="3"></textarea>
+
+                <label for="imgUrl">Image (URL):</label>
+                <input type="url" id="imgUrl">
+
+                <button type="submit">Submit Recipe</button>
+            </form>
+        </div>
+
+        <div class="recipe-container" id="recipe-container"></div>
+
+        <div class="modal" id="editModal">
+            <div class="modal-content">
+                <h2>Edit Recipe</h2>
+                <label for="edit-recipeName">Recipe Name:</label>
+                <input type="text" id="edit-recipeName">
+
+                <label for="edit-cookingTime">Cooking Time:</label>
+                <input type="text" id="edit-cookingTime">
+
+                <label for="edit-ingredients">Ingredients (one per line):</label>
+                <textarea id="edit-ingredients" rows="5"></textarea>
+
+                <label for="edit-instructions">Instructions (one per line):</label>
+                <textarea id="edit-instructions" rows="5"></textarea>
+
+                <label for="edit-equipment">Special Equipment Needed (one per line):</label>
+                <textarea id="edit-equipment" rows="3"></textarea>
+
+                <label for="edit-imgUrl">Image (URL):</label>
+                <input type="url" id="edit-imgUrl">
+
+                <button onclick="editRecipe()">Save Changes</button>
+                <button onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentEditId = null;
+
+        async function createRecipe() {
+            const recipeName = document.getElementById('recipeName').value;
+            const imgUrl = document.getElementById('imgUrl').value;
+            const cookingTime = document.getElementById('cookingTime').value;
+            const ingredients = document.getElementById('ingredients').value.split('\n'); // Assuming ingredients are entered line by line
+            const instructions = document.getElementById('instructions').value.split('\n'); // Assuming instructions are entered line by line
+            const equipment = document.getElementById('equipment').value.split('\n'); // Assuming equipment is entered line by line
+
+            if (!isValidImageUrl(imgUrl)) {
+                alert('Please enter a valid image URL.');
+                return;
+            }
+
+            const response = await fetch("http://localhost:3000/api/recipe", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ recipeName, imgUrl, cookingTime, ingredients, instructions, equipment })
+            });
+
+            if (response.ok) {
+                document.getElementById('recipeName').value = '';
+                document.getElementById('imgUrl').value = '';
+                document.getElementById('cookingTime').value = '';
+                document.getElementById('ingredients').value = '';
+                document.getElementById('instructions').value = '';
+                document.getElementById('equipment').value = '';
+                fetchRecipes();
+            } else {
+                console.error('Failed to create recipe:', response.statusText);
+            }
+        }
+
+        async function fetchRecipes() {
+            const response = await fetch('http://localhost:3000/api/recipe');
+            const recipes = await response.json();
+            const container = document.getElementById('recipe-container');
+            container.innerHTML = '';
+
+            recipes.forEach(recipe => {
+                const recipeDiv = document.createElement('div');
+                recipeDiv.className = 'recipe';
+                recipeDiv.innerHTML = `
+                    <h2>${recipe.recipeName}</h2>
+                    <p>Cooking Time: ${recipe.cookingTime}</p>
+                    <p>Ingredients:</p>
+                    <ul>${recipe.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')}</ul>
+                    <p>Instructions:</p>
+                    <ol>${recipe.instructions.map(step => `<li>${step}</li>`).join('')}</ol>
+                    <p>Equipment:</p>
+                    <ul>${recipe.equipment.map(item => `<li>${item}</li>`).join('')}</ul>
+                    <img src="${recipe.imgUrl}" alt="Recipe Image">
+                    <small>Posted on: ${new Date(recipe.date).toLocaleString()}</small>
+                    <div class="button2">
+                        <button class="edit-btn" onclick="openEditModal('${recipe._id}', '${recipe.recipeName}', '${recipe.cookingTime}', '${recipe.ingredients.join('\n')}', '${recipe.instructions.join('\n')}', '${recipe.equipment.join('\n')}', '${recipe.imgUrl}')">Edit</button>
+                        <button class="delete-btn" onclick="deleteRecipe('${recipe._id}')">Delete</button>
+                    </div>`;
+                container.appendChild(recipeDiv);
+            });
+        }
+
+        function isValidImageUrl(url) {
+            return /\.(jpeg|jpg|gif|png)$/.test(url);
+        }
+
+        function openEditModal(id, recipeName, cookingTime, ingredients, instructions, equipment, imgUrl) {
+            currentEditId = id;
+            document.getElementById('edit-recipeName').value = recipeName;
+            document.getElementById('edit-cookingTime').value = cookingTime;
+            document.getElementById('edit-ingredients').value = ingredients;
+            document.getElementById('edit-instructions').value = instructions;
+            document.getElementById('edit-equipment').value = equipment;
+            document.getElementById('edit-imgUrl').value = imgUrl;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function editRecipe() {
+            const recipeName = document.getElementById('edit-recipeName').value;
+            const cookingTime = document.getElementById('edit-cookingTime').value;
+            const ingredients = document.getElementById('edit-ingredients').value.split('\n');
+            const instructions = document.getElementById('edit-instructions').value.split('\n');
+            const equipment = document.getElementById('edit-equipment').value.split('\n');
+            const imgUrl = document.getElementById('edit-imgUrl').value;
+
+            if (currentEditId) {
+                const response = await fetch(`http://localhost:3000/api/recipe/${currentEditId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ recipeName, cookingTime, ingredients, instructions, equipment, imgUrl })
+                });
+
+                if (response.ok) {
+                    fetchRecipes();
+                    closeModal();
+                } else {
+                    console.error('Failed to update recipe:', response.statusText);
+                }
+            }
+        }
+
+        async function deleteRecipe(id) {
+            const response = await fetch(`http://localhost:3000/api/recipe/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                fetchRecipes();
+            } else {
+                console.error('Failed to delete recipe:', response.statusText);
+            }
+        }
+
+        window.onload = fetchRecipes;
+
+    </script>
+
+
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlatePalette</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 80px; /* Space for the fixed header */
+        }
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #cf1414;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 1.5em;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        header h1 {
+            font-family: 'Trebuchet MS', sans-serif;
+            letter-spacing: 2px;
+        }
+        /* Form Container */
+        .form-container {
+            background: #ffffff;
+            padding: 25px;
+            width: 350px;
+            border-radius: 10px;
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .form-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        .form-container form label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-container form input,
+        .form-container form textarea,
+        .form-container form button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .form-container form button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .form-container form button:hover {
+            background-color: #0056b3;
+        }
+        /* Recipe List */
+        .recipe-container {
+            width: 100%;
+            max-width: 800px;
+        }
+        .recipe {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        .recipe:hover {
+            transform: translateY(-3px);
+        }
+        .recipe h2 {
+            font-size: 1.5em;
+            color: #cf1414;
+        }
+        .recipe small {
+            display: block;
+            margin-bottom: 10px;
+            color: #6c757d;
+        }
+        .recipe img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .recipe .button-group {
+            margin-top: 15px;
+        }
+        .recipe .button-group button {
+            padding: 8px 12px;
+            margin-right: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            color: #fff;
+            transition: background 0.3s;
+        }
+        .recipe .edit-btn {
+            background-color: #28a745;
+        }
+        .recipe .edit-btn:hover {
+            background-color: #218838;
+        }
+        .recipe .delete-btn {
+            background-color: #dc3545;
+        }
+        .recipe .delete-btn:hover {
+            background-color: #c82333;
+        }
+        /* Modal for Editing Recipe */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 350px;
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        .modal-content h2 {
+            margin-bottom: 10px;
+        }
+        .modal-content input,
+        .modal-content textarea,
+        .modal-content button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .modal-content button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+        .modal-content button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>PlatePalette</h1>
+    </header>
+    <main>
+        <div class="form-container">
+            <h2>Recipe Information Form</h2>
+            <form onsubmit="event.preventDefault(); createRecipe();">
+                <label for="recipeName">Recipe Name:</label>
+                <input type="text" id="recipeName" required>
+
+                <label for="cookingTime">Cooking Time:</label>
+                <input type="text" id="cookingTime" required>
+
+                <label for="ingredients">Ingredients (one per line):</label>
+                <textarea id="ingredients" rows="5" required></textarea>
+
+                <label for="instructions">Instructions (one per line):</label>
+                <textarea id="instructions" rows="5" required></textarea>
+
+                <label for="equipment">Special Equipment Needed (one per line):</label>
+                <textarea id="equipment" rows="3"></textarea>
+
+                <label for="imgUrl">Image (URL):</label>
+                <input type="url" id="imgUrl">
+
+                <button type="submit">Submit Recipe</button>
+            </form>
+        </div>
+
+        <div class="recipe-container" id="recipe-container"></div>
+
+        <!-- Edit Modal -->
+        <div class="modal" id="editModal">
+            <div class="modal-content">
+                <h2>Edit Recipe</h2>
+                <label for="edit-recipeName">Recipe Name:</label>
+                <input type="text" id="edit-recipeName">
+
+                <label for="edit-cookingTime">Cooking Time:</label>
+                <input type="text" id="edit-cookingTime">
+
+                <label for="edit-ingredients">Ingredients (one per line):</label>
+                <textarea id="edit-ingredients" rows="5"></textarea>
+
+                <label for="edit-instructions">Instructions (one per line):</label>
+                <textarea id="edit-instructions" rows="5"></textarea>
+
+                <label for="edit-equipment">Special Equipment Needed (one per line):</label>
+                <textarea id="edit-equipment" rows="3"></textarea>
+
+                <label for="edit-imgUrl">Image (URL):</label>
+                <input type="url" id="edit-imgUrl">
+
+                <button onclick="editRecipe()">Save Changes</button>
+                <button onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentEditId = null;
+
+        // Function to create a new recipe by sending a POST request
+        async function createRecipe() {
+            const recipeName = document.getElementById('recipeName').value;
+            const cookingTime = document.getElementById('cookingTime').value;
+            const ingredients = document.getElementById('ingredients').value.split('\n');
+            const instructions = document.getElementById('instructions').value.split('\n');
+            const equipment = document.getElementById('equipment').value.split('\n');
+            const imgUrl = document.getElementById('imgUrl').value;
+
+            if (!isValidImageUrl(imgUrl)) {
+                alert('Please enter a valid image URL.');
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:3000/api/recipe", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ recipeName, imgUrl, cookingTime, ingredients, instructions, equipment })
+                });
+
+                if (response.ok) {
+                    resetForm();
+                    fetchRecipes();
+                } else {
+                    console.error('Failed to create recipe:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error creating recipe:', error);
+            }
+        }
+
+        // Function to fetch all recipes from the server and display them
+        async function fetchRecipes() {
+            try {
+                const response = await fetch('http://localhost:3000/api/recipe');
+                const recipes = await response.json();
+                const container = document.getElementById('recipe-container');
+                container.innerHTML = '';
+
+                recipes.forEach(recipe => {
+                    const ingredients = recipe.ingredients.split('\n');
+                    const instructions = recipe.instructions.split('\n');
+                    const equipment = recipe.equipment ? recipe.equipment.split('\n') : [];
+
+                    const recipeDiv = document.createElement('div');
+                    recipeDiv.className = 'recipe';
+                    recipeDiv.innerHTML = `
+                        <h2>${recipe.recipeName}</h2>
+                        <p>Cooking Time: ${recipe.cookingTime}</p>
+                        <p>Ingredients:</p>
+                        <ul>${ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')}</ul>
+                        <p>Instructions:</p>
+                        <ol>${instructions.map(step => `<li>${step}</li>`).join('')}</ol>
+                        <p>Equipment:</p>
+                        <ul>${equipment.map(item => `<li>${item}</li>`).join('')}</ul>
+                        <img src="${recipe.imgUrl}" alt="Recipe Image">
+                        <small>Posted on: ${new Date(recipe.date).toLocaleString()}</small>
+                        <div class="button-group">
+                            <button class="edit-btn" onclick="openEditModal('${recipe._id}', '${recipe.recipeName}', '${recipe.cookingTime}', '${ingredients.join('\n')}', '${instructions.join('\n')}', '${equipment.join('\n')}', '${recipe.imgUrl}')">Edit</button>
+                            <button class="delete-btn" onclick="deleteRecipe('${recipe._id}')">Delete</button>
+                        </div>`;
+                    container.appendChild(recipeDiv);
+                });
+            } catch (error) {
+                console.error('Error fetching recipes:', error);
+            }
+        }
+
+        // Function to validate the image URL format
+        function isValidImageUrl(url) {
+            return /\.(jpeg|jpg|gif|png)$/.test(url);
+        }
+
+        // Function to reset the input form after submitting
+        function resetForm() {
+            document.getElementById('recipeName').value = '';
+            document.getElementById('imgUrl').value = '';
+            document.getElementById('cookingTime').value = '';
+            document.getElementById('ingredients').value = '';
+            document.getElementById('instructions').value = '';
+            document.getElementById('equipment').value = '';
+        }
+
+        // Function to open the edit modal and populate it with the current recipe's data
+        function openEditModal(id, recipeName, cookingTime, ingredients, instructions, equipment, imgUrl) {
+            currentEditId = id;
+            document.getElementById('edit-recipeName').value = recipeName;
+            document.getElementById('edit-cookingTime').value = cookingTime;
+            document.getElementById('edit-ingredients').value = ingredients;
+            document.getElementById('edit-instructions').value = instructions;
+            document.getElementById('edit-equipment').value = equipment;
+            document.getElementById('edit-imgUrl').value = imgUrl;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        // Function to close the edit modal
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // Function to update an existing recipe by sending a PUT request
+        async function editRecipe() {
+            const recipeName = document.getElementById('edit-recipeName').value;
+            const cookingTime = document.getElementById('edit-cookingTime').value;
+            const ingredients = document.getElementById('edit-ingredients').value.split('\n');
+            const instructions = document.getElementById('edit-instructions').value.split('\n');
+            const equipment = document.getElementById('edit-equipment').value.split('\n');
+            const imgUrl = document.getElementById('edit-imgUrl').value;
+
+            if (currentEditId) {
+                try {
+                    const response = await fetch(`http://localhost:3000/api/recipe/${currentEditId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ recipeName, cookingTime, ingredients, instructions, equipment, imgUrl })
+                    });
+
+                    if (response.ok) {
+                        fetchRecipes();
+                        closeModal();
+                    } else {
+                        console.error('Failed to update recipe:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Error updating recipe:', error);
+                }
+            }
+        }
+
+        // Function to delete a recipe by sending a DELETE request
+        async function deleteRecipe(id) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/recipe/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    fetchRecipes();
+                } else {
+                    console.error('Failed to delete recipe:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error deleting recipe:', error);
+            }
+        }
+
+        // Load recipes when the page is loaded
+        window.onload = fetchRecipes;
+
+
+    </script>
+</body>
+</html>
