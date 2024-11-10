@@ -38,7 +38,7 @@
             letter-spacing: 2px;
         }
         /* Form Container */
-        .form-container {
+        .form-container1 {
             background: #ffffff;
             padding: 25px;
             width: 350px;
@@ -46,20 +46,20 @@
             box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
         }
-        .form-container h2 {
+        .form-container1 h2 {
             margin-bottom: 20px;
             color: #333;
             text-align: center;
         }
-        .form-container form label {
+        .form-container1 form label {
             display: block;
             margin-top: 15px;
             font-weight: bold;
             color: #555;
         }
-        .form-container form input,
-        .form-container form textarea,
-        .form-container form button {
+        .form-container1 form input,
+        .form-container1 form textarea,
+        .form-container1 form button {
             width: 100%;
             padding: 10px;
             margin-top: 8px;
@@ -67,7 +67,7 @@
             border-radius: 5px;
             font-size: 1em;
         }
-        .form-container form button {
+        .form-container1 form button {
             background-color: #007bff;
             color: #fff;
             border: none;
@@ -75,11 +75,11 @@
             margin-top: 20px;
             transition: background 0.3s;
         }
-        .form-container form button:hover {
+        .form-container1 form button:hover {
             background-color: #0056b3;
         }
         /* Recipe List */
-        .recipe-container {
+        .recipe-container1 {
             width: 100%;
             max-width: 800px;
         }
@@ -134,7 +134,7 @@
             background-color: #c82333;
         }
         /* Modal for Editing Recipe */
-        .modal {
+        .modal1 {
             display: none;
             position: fixed;
             top: 0;
@@ -146,26 +146,26 @@
             align-items: center;
             z-index: 1001;
         }
-        .modal-content {
+        .modal1-content {
             background: #fff;
             padding: 20px;
             border-radius: 10px;
             width: 350px;
             box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
         }
-        .modal-content h2 {
+        .modal1-content h2 {
             margin-bottom: 10px;
         }
-        .modal-content input,
-        .modal-content textarea,
-        .modal-content button {
+        .modal1-content input,
+        .modal1-content textarea,
+        .modal1-content button {
             width: 100%;
             padding: 8px;
             margin-top: 8px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
-        .modal-content button {
+        .modal1-content button {
             background-color: #007bff;
             color: #fff;
             border: none;
@@ -173,7 +173,7 @@
             margin-top: 15px;
             transition: background 0.3s;
         }
-        .modal-content button:hover {
+        .modal1-content button:hover {
             background-color: #2bf052;
         }
     </style>
@@ -184,7 +184,7 @@
     </header>
     <main>
         <center>
-            <div class="form-container">
+            <div class="form-container1">
                 <h2>Recipe Information Form</h2>
                 <form onsubmit="event.preventDefault(); createRecipe();">
                     <label for="recipeName">Recipe Name:</label>
@@ -211,10 +211,10 @@
         </center>
         
 
-        <div class="recipe-container" id="recipe-container"></div>
+        <div class="recipe-container1" id="recipe-container"></div>
 
         
-        <div class="modal" id="editModal">
+        <div class="modal1" id="editModal">
             <div class="modal-content">
                 <h2>Edit Recipe</h2>
                 <label for="edit-recipeName">Recipe Name:</label>
