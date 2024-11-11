@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express()
 const path = require('path');
-const recipeRouter = require('../platepalette/routes/route');
+const recipeRouter = require('../Recipe/routes/route');
 app.use('/api',recipeRouter);
 app.use(cors());
 
@@ -20,7 +20,7 @@ mongoose.connect(process.env.DB_URL,{
 app.use(express.static(path.join(__dirname,'public')));
 
 app.get('/',(req, res) =>{
-    res.sendFile(path.join(__dirname,'view','page.html'));
+    res.sendFile(path.join(__dirname,'view','index.html'));
 })
 
 const port = 3000;
